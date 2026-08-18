@@ -117,9 +117,8 @@ def render_page(page_idx, page_bars, notes, tpb, spans, whites, ww,
     th = theme()
     W = config.IMAGE_WIDTH
     H = int(round(W * config.A4_RATIO))
-    m = config.MARGIN
-    x0_page, x1_page = m, W - m
-    y_top, y_bot = m, H - m
+    x0_page, x1_page = config.MARGIN_LEFT, W - config.MARGIN_RIGHT
+    y_top, y_bot = config.MARGIN_TOP, H - config.MARGIN_BOTTOM
 
     start_tick = page_bars[0]
     end_tick = page_bars[-1]
@@ -141,8 +140,8 @@ def render_page(page_idx, page_bars, notes, tpb, spans, whites, ww,
     for p in whites:
         if p % 12 in (0, 5):  # C and F: line at their left edge (B|C, E|F)
             x = spans[p][0]
-            draw.line([x, y_top, x, y_bot], fill=th["line"],
-                      width=config.LINE_WIDTH)
+            w = config.BC_LINE_WIDTH if p % 12 == 0 else config.LINE_WIDTH
+            draw.line([x, y_top, x, y_bot], fill=th["line"], width=w)
 
     # bar lines + numbers
     first_bar_number = page_idx * config.BARS_PER_PAGE + 1
@@ -152,8 +151,8 @@ def render_page(page_idx, page_bars, notes, tpb, spans, whites, ww,
                   width=config.LINE_WIDTH)
         if config.SHOW_BAR_NUMBERS:
             # place the number inside the bar it labels
-            ty = y + 4 if downward else y - config.FONT_SIZE - 4
-            draw.text((x0_page + 4, ty),
+            ty = y + 8 if downward else y - config.FONT_SIZE - 8
+            draw.text((x0_page + 8, ty),
                       str(first_bar_number + i), fill=th["text"], font=font)
     y = y_of(end_tick)
     draw.line([x0_page, y, x1_page, y], fill=th["line"],
@@ -192,7 +191,8 @@ def main():
         hi = (max(pitches) // 12) * 12 + 11  # round up to B
 
     spans, whites, ww = key_layout(
-        lo, hi, config.MARGIN, config.IMAGE_WIDTH - 2 * config.MARGIN)
+        lo, hi, config.MARGIN_LEFT,
+        config.IMAGE_WIDTH - config.MARGIN_LEFT - config.MARGIN_RIGHT)
     font = load_font()
 
     out_path = args.output or (

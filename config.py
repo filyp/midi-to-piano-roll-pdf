@@ -6,7 +6,11 @@ BARS_PER_PAGE = 8          # bars (measures) per output image
 # --- Image geometry (A4 portrait) ---
 IMAGE_WIDTH = 1748         # px; height is width * sqrt(2) ~ A4 at 150 dpi
 A4_RATIO = 2 ** 0.5
-MARGIN = 30                # px page margin on all sides
+# px page margins per side
+MARGIN_LEFT = 30
+MARGIN_RIGHT = 30
+MARGIN_TOP = 30
+MARGIN_BOTTOM = 60
 
 # --- Key range ---
 # None = use only the octaves actually present in the piece (rounded out to
@@ -36,7 +40,9 @@ DARK = {
     "text": (255, 255, 255),
 }
 
-LINE_WIDTH = 1
+
+LINE_WIDTH = 1             # bar lines and E|F lane lines
+BC_LINE_WIDTH = 4          # the B|C (H|C) lane lines, i.e. octave boundaries
 NOTE_RADIUS = 3            # px, rounded corner radius of notes
 
 # --- Output ---
@@ -45,4 +51,4 @@ OUTPUT_SUFFIX = ".pdf"
 
 # --- Misc ---
 SHOW_BAR_NUMBERS = True
-FONT_SIZE = 16
+FONT_SIZE = 28
