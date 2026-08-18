@@ -10,7 +10,7 @@ A4_RATIO = 2 ** 0.5
 MARGIN_LEFT = 30
 MARGIN_RIGHT = 30
 MARGIN_TOP = 30
-MARGIN_BOTTOM = 60
+MARGIN_BOTTOM = 70
 
 # --- Key range ---
 # None = use only the octaves actually present in the piece (rounded out to
@@ -22,27 +22,23 @@ KEY_RANGE = None
 # "up": Synthesia-style, first bar at the bottom, later notes higher up.
 DIRECTION = "down"
 
-# --- Theme ---
-DARK_MODE = False
+# --- Colors ---
+BACKGROUND = (255, 255, 255)
+LINE = (0, 0, 0)           # bar lines and B/C, E/F lane lines
+TEXT = (0, 0, 0)
 
-LIGHT = {
-    "background": (255, 255, 255),
-    "line": (0, 0, 0),             # bar lines and B/C, E/F lane lines
-    "white_key_note": (150, 150, 150),
-    "black_key_note": (0, 0, 0),
-    "text": (0, 0, 0),
-}
-DARK = {
-    "background": (0, 0, 0),
-    "line": (255, 255, 255),
-    "white_key_note": (255, 255, 255),
-    "black_key_note": (150, 150, 150),
-    "text": (255, 255, 255),
-}
+# Note colors per hand; "white"/"black" = key color, white keys lighter.
+# Hand 0 = right, hand 1 = left. Determined from kern spines / MIDI tracks
+# (the part with the higher average pitch is taken as the right hand);
+# single-part files are drawn entirely with RIGHT_HAND colors.
+RIGHT_HAND = {"white": (130, 215, 130), "black": (0, 130, 0)}    # green
+LEFT_HAND = {"white": (245, 150, 150), "black": (205, 0, 0)}     # red
 
+# --- Key geometry ---
+BLACK_KEY_WIDTH = 0.5      # black key lane width as fraction of a white key
 
 LINE_WIDTH = 1             # bar lines and E|F lane lines
-BC_LINE_WIDTH = 4          # the B|C (H|C) lane lines, i.e. octave boundaries
+BC_LINE_WIDTH = 5          # the B|C (H|C) lane lines, i.e. octave boundaries
 NOTE_RADIUS = 3            # px, rounded corner radius of notes
 
 # --- Output ---
