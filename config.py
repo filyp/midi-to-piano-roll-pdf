@@ -13,6 +13,11 @@ MARGIN = 30                # px page margin on all sides
 # full C..B octaves). Or set explicitly, e.g. (21, 108) for a full 88 keys.
 KEY_RANGE = None
 
+# --- Direction ---
+# "down": time flows downward, first bar at the top (reading order).
+# "up": Synthesia-style, first bar at the bottom, later notes higher up.
+DIRECTION = "down"
+
 # --- Theme ---
 DARK_MODE = False
 

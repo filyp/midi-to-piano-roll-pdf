@@ -125,7 +125,12 @@ def render_page(page_idx, page_bars, notes, tpb, spans, whites, ww,
     end_tick = page_bars[-1]
     px_per_tick = (y_bot - y_top) / (end_tick - start_tick)
 
+    downward = config.DIRECTION == "down"
+
     def y_of(tick):
+        if downward:
+            # earliest tick of the page maps to the top of the page
+            return y_top + (tick - start_tick) * px_per_tick
         # earliest tick of the page maps to the bottom of the page
         return y_bot - (tick - start_tick) * px_per_tick
 
@@ -146,7 +151,9 @@ def render_page(page_idx, page_bars, notes, tpb, spans, whites, ww,
         draw.line([x0_page, y, x1_page, y], fill=th["line"],
                   width=config.LINE_WIDTH)
         if config.SHOW_BAR_NUMBERS:
-            draw.text((x0_page + 4, y - config.FONT_SIZE - 4),
+            # place the number inside the bar it labels
+            ty = y + 4 if downward else y - config.FONT_SIZE - 4
+            draw.text((x0_page + 4, ty),
                       str(first_bar_number + i), fill=th["text"], font=font)
     y = y_of(end_tick)
     draw.line([x0_page, y, x1_page, y], fill=th["line"],
@@ -158,7 +165,8 @@ def render_page(page_idx, page_bars, notes, tpb, spans, whites, ww,
             continue
         s_c, e_c = max(s, start_tick), min(e, end_tick)
         nx0, nx1 = spans[p]
-        ny_top, ny_bot = y_of(e_c), y_of(s_c)
+        ya, yb = y_of(s_c), y_of(e_c)
+        ny_top, ny_bot = min(ya, yb), max(ya, yb)
         color = th["black_key_note"] if is_black(p) else th["white_key_note"]
         draw.rounded_rectangle([nx0 + 1, ny_top, nx1 - 1, ny_bot],
                                radius=config.NOTE_RADIUS, fill=color)
