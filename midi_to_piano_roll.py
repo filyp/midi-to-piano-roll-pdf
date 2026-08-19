@@ -93,6 +93,10 @@ def load_kern(path):
     # (*^), so go kern -> MEI via verovio, then parse the MEI.
     import verovio
     from music21 import converter
+    from music21.mei import base as mei_base
+    # music21's MEI importer crashes on beam groups ending in a rest
+    # (Rest has no .beams); beaming is irrelevant for a piano roll.
+    mei_base.beamTogether = lambda things, *a, **kw: things
     tk = verovio.toolkit()
     if not tk.loadFile(path):
         sys.exit(f"verovio could not parse {path}")
