@@ -89,23 +89,46 @@ def load_midi(path):
 
 
 def load_kern(path):
+    # music21's own humdrum parser drops notes on mid-piece spine splits
+    # (*^), so go kern -> MEI via verovio, then parse the MEI.
+    import verovio
     from music21 import converter
-    score = converter.parse(path)
+    tk = verovio.toolkit()
+    if not tk.loadFile(path):
+        sys.exit(f"verovio could not parse {path}")
+    score = converter.parse(tk.getMEI(), format="mei")
+
+    # Single-spine files (e.g. Bach WTC) have no staff separation; fall
+    # back to the notated voices so hands can still be told apart.
+    note_parts = list(score.parts)
+    if len(note_parts) == 1:
+        voiced = note_parts[0].voicesToParts()
+        if len(voiced.parts) > 1:
+            note_parts = list(voiced.parts)
 
     part_notes = []
     bar_offsets = set()
-    end = 0.0
-    for part in score.parts:
+    for part in note_parts:
         pn = []
-        flat = part.flatten()
-        for n in flat.notes:
-            s = float(n.offset)
-            e = s + float(n.duration.quarterLength)
-            if e <= s:
-                e = s + 0.25
-            end = max(end, e)
-            for pitch in n.pitches:
-                pn.append((int(s * TPB), int(e * TPB), pitch.midi, None))
+        open_ties = {}  # pitch -> index into pn of the note awaiting its tail
+        elems = sorted(part.flatten().notes, key=lambda n: n.offset)
+        for n in elems:
+            s = int(float(n.offset) * TPB)
+            e = int((float(n.offset) + float(n.duration.quarterLength)) * TPB)
+            e = max(e, s + 1)
+            for comp in (n.notes if n.isChord else [n]):
+                p = comp.pitch.midi
+                tie = comp.tie.type if comp.tie else None
+                prev = open_ties.get(p)
+                if tie in ("stop", "continue") and prev is not None:
+                    ps, pe, pp, ph = pn[prev]
+                    pn[prev] = (ps, max(pe, e), pp, ph)
+                    if tie == "stop":
+                        del open_ties[p]
+                else:
+                    pn.append((s, e, p, None))
+                    if tie in ("start", "continue"):
+                        open_ties[p] = len(pn) - 1
         part_notes.append(pn)
         for m in part.recurse().getElementsByClass("Measure"):
             bar_offsets.add(int(float(m.getOffsetInHierarchy(part)) * TPB))
