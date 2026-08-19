@@ -31,15 +31,15 @@ TEXT = (0, 0, 0)
 # Hand 0 = right, hand 1 = left. Determined from kern spines / MIDI tracks
 # (the part with the higher average pitch is taken as the right hand);
 # single-part files are drawn entirely with RIGHT_HAND colors.
-RIGHT_HAND = {"white": (160, 245, 160), "black": (100, 230, 100)}    # green
-LEFT_HAND = {"white": (255, 180, 180), "black": (235, 100, 100)}     # red
+RIGHT_HAND = {"white": (160, 245, 160), "black": (60, 180, 60)}    # green
+LEFT_HAND = {"white": (255, 180, 180), "black": (180, 60, 60)}     # red
 
 # --- Key geometry ---
 BLACK_KEY_WIDTH = 0.5      # black key lane width as fraction of a white key
 
 LINE_WIDTH = 1             # bar lines and E|F lane lines
 BC_LINE_WIDTH = 5          # the B|C (H|C) lane lines, i.e. octave boundaries
-NOTE_RADIUS = 10            # px, rounded corner radius of notes
+NOTE_RADIUS = 15            # px, rounded corner radius of notes
 
 # --- Output ---
 # PDF is written next to the input file as <name>.pdf unless -o is given.
