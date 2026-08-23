@@ -28,18 +28,56 @@ def assign_hands(part_notes):
     """part_notes: list of note lists, one per part/track.
 
     Returns flat note list with hand index set: the part with the highest
-    mean pitch becomes hand 0 (right), all others hand 1 (left).
+    mean pitch becomes hand 0 (right), all others hand 1 (left). An organ
+    pedal part, if detected, becomes hand 2 instead.
     """
     parts = [pn for pn in part_notes if pn]
     if not parts:
         sys.exit("No notes found in the input file.")
     means = [sum(n[2] for n in pn) / len(pn) for pn in parts]
     right = means.index(max(means))
+    # two hands cover two parts; a third part means feet
+    pedal = means.index(min(means)) if len(parts) >= 3 else None
+    shift = 12 * config.PEDAL_OCTAVE
     notes = []
     for i, pn in enumerate(parts):
-        hand = 0 if (i == right or len(parts) == 1) else 1
-        notes += [(s, e, p, hand) for s, e, p, _ in pn]
+        if i == right or len(parts) == 1:
+            hand = 0
+        elif i == pedal:
+            hand = 2
+        else:
+            hand = 1
+        dp = shift if hand == 2 else 0
+        notes += [(s, e, p + dp, hand) for s, e, p, _ in pn]
     return notes
+
+
+def drop_doubled_tracks(part_notes):
+    """Remove tracks that duplicate an earlier one, possibly octave-shifted.
+
+    Some organ/orchestrated MIDIs (e.g. the Mutopia BWV 639) render each
+    voice several times with different instruments and octave doublings,
+    which would otherwise show up as extra rows of notes.
+    """
+    kept = []
+    for pn in part_notes:
+        if not pn:
+            continue
+        sig = sorted((s, p) for s, _e, p, _h in pn)
+        dup = False
+        for k in kept:
+            ksig = sorted((s, p) for s, _e, p, _h in k)
+            if len(ksig) != len(sig):
+                continue
+            if [x[0] for x in ksig] != [x[0] for x in sig]:
+                continue
+            offs = {a[1] - b[1] for a, b in zip(sig, ksig)}
+            if len(offs) == 1 and abs(offs.pop()) % 12 == 0:
+                dup = True
+                break
+        if not dup:
+            kept.append(pn)
+    return kept
 
 
 def load_midi(path):
@@ -68,6 +106,7 @@ def load_midi(path):
         max_tick = max(max_tick, t)
         part_notes.append(pn)
 
+    part_notes = drop_doubled_tracks(part_notes)
     notes = assign_hands(part_notes)
     max_tick = max(max_tick, max(n[1] for n in notes))
 
@@ -223,7 +262,8 @@ def render_page(bar_number_first, page_bars, notes, spans, whites,
         s_c, e_c = max(s, start_tick), min(e, end_tick)
         nx0, nx1 = spans[p]
         ya, yb = y_of(s_c), y_of(e_c)
-        palette = config.LEFT_HAND if hand == 1 else config.RIGHT_HAND
+        palette = {0: config.RIGHT_HAND, 1: config.LEFT_HAND,
+                   2: config.PEDAL}[hand]
         color = palette["black"] if is_black(p) else palette["white"]
         draw.rounded_rectangle([nx0 + 1, min(ya, yb), nx1 - 1, max(ya, yb)],
                                radius=config.NOTE_RADIUS, fill=color)

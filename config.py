@@ -28,11 +28,20 @@ LINE = (0, 0, 0)           # bar lines and B/C, E/F lane lines
 TEXT = (0, 0, 0)
 
 # Note colors per hand; "white"/"black" = key color, white keys lighter.
-# Hand 0 = right, hand 1 = left. Determined from kern spines / MIDI tracks
-# (the part with the higher average pitch is taken as the right hand);
-# single-part files are drawn entirely with RIGHT_HAND colors.
+# Hand 0 = right, hand 1 = left, hand 2 = pedal. Determined from kern spines
+# / MIDI tracks (the part with the higher average pitch is taken as the right
+# hand); single-part files are drawn entirely with RIGHT_HAND colors.
 RIGHT_HAND = {"white": (160, 245, 160), "black": (60, 180, 60)}    # green
 LEFT_HAND = {"white": (255, 180, 180), "black": (180, 60, 60)}     # red
+PEDAL = {"white": (170, 200, 255), "black": (50, 100, 200)}        # blue
+
+# A pedal part is detected automatically: with three or more parts, the
+# lowest one is taken to be the pedal (two hands cover two parts; a third
+# means feet). Two-part piano music never has one.
+#
+# Draw the pedal part shifted by this many octaves, to pull it clear of the
+# left hand when their ranges overlap. Negative = down. 0 = true pitch.
+PEDAL_OCTAVE = 0
 
 # --- Key geometry ---
 BLACK_KEY_WIDTH = 0.5      # black key lane width as fraction of a white key
